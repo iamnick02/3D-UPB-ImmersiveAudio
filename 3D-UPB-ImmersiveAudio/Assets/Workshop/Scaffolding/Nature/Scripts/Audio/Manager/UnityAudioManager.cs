@@ -7,17 +7,25 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 {
     public class UnityAudioManager : AudioManager
     {
+        [Header("Footsteps")]
         [SerializeField] private AudioSource footstepAudioSource;
 
         [SerializeField] private AudioClip[] dirtFootsteps;
         [SerializeField] private AudioClip[] stoneFootsteps;
         [SerializeField] private AudioClip[] woodFootsteps;
 
+        [Header("Ambience & Music")]
         [SerializeField] private AudioSource ambienceAudioSource;
         [SerializeField] private AudioSource nightAmbienceAudioSource;
         [SerializeField] private AudioSource musicAudioSource;
 
+        [Header("Audio Mixer")]
         [SerializeField] private AudioMixer audioMixer;
+
+        [Header("Underwater Snapshots")]
+        [SerializeField] private AudioMixerSnapshot normalSnapshot;
+        [SerializeField] private AudioMixerSnapshot underwaterSnapshot;
+        [SerializeField] private float snapshotTransitionTime = 0.5f;
 
         private void OnEnable()
         {
@@ -28,6 +36,9 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
             dayNightCycleController.OnDayNightCycleValueChanged +=
                 HandleDayNightCycleChanged;
+
+            waterVolumeDetector.OnUnderwaterStateChanged +=
+                HandleUnderwaterStateChanged;
 
             CollectibleTracker.Instance.OnCollectibleGathered +=
                 HandleCollectibleGathered;
@@ -43,6 +54,9 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
             dayNightCycleController.OnDayNightCycleValueChanged -=
                 HandleDayNightCycleChanged;
 
+            waterVolumeDetector.OnUnderwaterStateChanged -=
+                HandleUnderwaterStateChanged;
+
             CollectibleTracker.Instance.OnCollectibleGathered -=
                 HandleCollectibleGathered;
         }
@@ -55,6 +69,12 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
             ambienceAudioSource.Play();
             nightAmbienceAudioSource.Play();
             musicAudioSource.Play();
+
+            // Pornim pe sunetul normal.
+            if (normalSnapshot != null)
+            {
+                normalSnapshot.TransitionTo(0f);
+            }
         }
 
         private void HandleFootstep(
@@ -94,6 +114,26 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
             nightAmbienceAudioSource.volume =
                 Mathf.Lerp(0f, 1f, value);
+        }
+
+        private void HandleUnderwaterStateChanged(bool isUnderwater)
+        {
+            if (isUnderwater)
+            {
+                if (underwaterSnapshot != null)
+                {
+                    underwaterSnapshot.TransitionTo(
+                        snapshotTransitionTime);
+                }
+            }
+            else
+            {
+                if (normalSnapshot != null)
+                {
+                    normalSnapshot.TransitionTo(
+                        snapshotTransitionTime);
+                }
+            }
         }
 
         private void HandleAudioOptionChanged(

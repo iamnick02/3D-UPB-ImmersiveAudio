@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 1718201050704171013}
   - component: {fileID: 3374865667218373427}
   - component: {fileID: 6777287228835519983}
-  - component: {fileID: 3330899554414101628}
+  - component: {fileID: -5968257017252305890}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -204,14 +204,20 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &3330899554414101628
-AudioListener:
+--- !u!114 &-5968257017252305890
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1091498106256668382}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
+  nonRigidbodyVelocity: 0
+  attenuationObject: {fileID: 0}
 --- !u!1 &1741725665782219960
 GameObject:
   m_ObjectHideFlags: 0

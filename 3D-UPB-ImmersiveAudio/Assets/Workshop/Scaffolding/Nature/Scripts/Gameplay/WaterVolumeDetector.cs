@@ -6,44 +6,70 @@ namespace Workshop.Scaffolding.Nature.Scripts.Gameplay
 {
     public class WaterVolumeDetector : MonoBehaviour
     {
-        [SerializeField] 
+        [SerializeField]
         [BoxGroup("Internal components")]
         private Collider waterVolumeCollider;
 
-        [SerializeField] 
+        [SerializeField]
         [BoxGroup("External components")]
         private Camera playerCamera;
 
+        [SerializeField]
+        [BoxGroup("External components")]
+        private CharacterController playerController;
+
         public event Action<bool> OnUnderwaterStateChanged;
-    
+        public event Action<bool> OnWaterContactStateChanged;
+
         private bool isCamUnderwater;
+        private bool isPlayerTouchingWater;
 
         private void Start()
         {
-            // Assumes character is spawned above water!
             isCamUnderwater = false;
-            OnUnderwaterStateChanged?.Invoke(isCamUnderwater);
+            isPlayerTouchingWater = false;
+
+            OnUnderwaterStateChanged?.Invoke(false);
+            OnWaterContactStateChanged?.Invoke(false);
         }
 
         private void Update()
         {
             var waterBounds = waterVolumeCollider.bounds;
 
-            // Check if camera is inside bounds.
-            if (waterBounds.Contains(playerCamera.transform.position))
+            // Camera sub apa
+            bool cameraUnderwater =
+                waterBounds.Contains(playerCamera.transform.position);
+
+            if (cameraUnderwater != isCamUnderwater)
             {
-                if (isCamUnderwater) return;
-                
-                isCamUnderwater = true;
-                OnUnderwaterStateChanged?.Invoke(true);
+                isCamUnderwater = cameraUnderwater;
+
+                OnUnderwaterStateChanged?.Invoke(
+                    isCamUnderwater);
             }
-            else
+
+            // Playerul atinge/intersecteaza volumul apei
+            bool touchingWater =
+                playerController != null &&
+                waterBounds.Intersects(playerController.bounds);
+
+            if (touchingWater != isPlayerTouchingWater)
             {
-                if (!isCamUnderwater) return;
-                
-                isCamUnderwater = false;
-                OnUnderwaterStateChanged?.Invoke(false);
+                isPlayerTouchingWater = touchingWater;
+
+                OnWaterContactStateChanged?.Invoke(
+                    isPlayerTouchingWater);
             }
+        }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
+                return;
+
+            playerController ??=
+                FindAnyObjectByType<CharacterController>();
         }
     }
 }

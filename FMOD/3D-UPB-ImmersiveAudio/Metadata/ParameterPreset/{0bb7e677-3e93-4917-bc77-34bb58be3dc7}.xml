@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{0bb7e677-3e93-4917-bc77-34bb58be3dc7}">
+		<property name="name">
+			<value>SpeedBlend</value>
+		</property>
+		<relationship name="folder">
+			<destination>{8d559d79-50b4-4dbd-aeb8-839e3a7f5cd0}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{86f6c87d-1dc9-421d-813c-a2230df17dbc}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{86f6c87d-1dc9-421d-813c-a2230df17dbc}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

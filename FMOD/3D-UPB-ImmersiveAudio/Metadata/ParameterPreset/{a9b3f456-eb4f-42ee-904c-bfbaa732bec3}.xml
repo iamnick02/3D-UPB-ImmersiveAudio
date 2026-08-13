@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{a9b3f456-eb4f-42ee-904c-bfbaa732bec3}">
+		<property name="name">
+			<value>MaterialType</value>
+		</property>
+		<relationship name="folder">
+			<destination>{8d559d79-50b4-4dbd-aeb8-839e3a7f5cd0}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{2392311e-c9a5-40f1-a662-fe0c7563c9a1}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{2392311e-c9a5-40f1-a662-fe0c7563c9a1}">
+		<property name="parameterType">
+			<value>2</value>
+		</property>
+		<property name="maximum">
+			<value>4</value>
+		</property>
+		<property name="enumerationLabels">
+			<value>Dirt</value>
+			<value>Stone</value>
+			<value>Wood</value>
+			<value>Water</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<relationship name="automators">
+			<destination>{4be0d5ad-824c-4231-a2c3-3e4e7fd5c744}</destination>
+		</relationship>
+	</object>
+	<object class="Automator" id="{4be0d5ad-824c-4231-a2c3-3e4e7fd5c744}">
+		<property name="nameOfPropertyBeingAutomated">
+			<value>cursorPosition</value>
+		</property>
+	</object>
+</objects>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{569e2ac9-3726-4d4d-b093-81c6c9455c6d}">
+		<property name="assetPath">
+			<value>GenericAlert_1.mp3</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>0.79200000000000004</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{735eead2-da3e-4813-9786-8dc18d43c275}</destination>
+		</relationship>
+	</object>
+</objects>
