@@ -24,22 +24,23 @@ namespace Workshop.Scaffolding.Nature.Scripts.Gameplay
         private bool isCamUnderwater;
         private bool isPlayerTouchingWater;
 
+
         private void Start()
         {
             isCamUnderwater = false;
             isPlayerTouchingWater = false;
 
             OnUnderwaterStateChanged?.Invoke(false);
-            OnWaterContactStateChanged?.Invoke(false);
         }
+
 
         private void Update()
         {
             var waterBounds = waterVolumeCollider.bounds;
 
-            // Camera sub apa
             bool cameraUnderwater =
-                waterBounds.Contains(playerCamera.transform.position);
+                waterBounds.Contains(
+                    playerCamera.transform.position);
 
             if (cameraUnderwater != isCamUnderwater)
             {
@@ -49,10 +50,10 @@ namespace Workshop.Scaffolding.Nature.Scripts.Gameplay
                     isCamUnderwater);
             }
 
-            // Playerul atinge/intersecteaza volumul apei
+
             bool touchingWater =
-                playerController != null &&
-                waterBounds.Intersects(playerController.bounds);
+                waterBounds.Intersects(
+                    playerController.bounds);
 
             if (touchingWater != isPlayerTouchingWater)
             {
@@ -61,15 +62,6 @@ namespace Workshop.Scaffolding.Nature.Scripts.Gameplay
                 OnWaterContactStateChanged?.Invoke(
                     isPlayerTouchingWater);
             }
-        }
-
-        private void OnValidate()
-        {
-            if (Application.isPlaying)
-                return;
-
-            playerController ??=
-                FindAnyObjectByType<CharacterController>();
         }
     }
 }

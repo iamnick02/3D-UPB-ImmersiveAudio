@@ -5,6 +5,9 @@ using FMODUnity;
 using NaughtyAttributes;
 using UnityEngine;
 
+using Workshop.Scaffolding.Nature.Scripts.Audio;
+using Workshop.Scaffolding.Nature.Scripts.Collectible;
+
 using static Workshop.Scaffolding.Nature.Scripts.Audio.AudioUtils;
 
 namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
@@ -22,6 +25,9 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
         [SerializeField, BoxGroup("FMOD Events")]
         private EventReference collectiblePickupEvent;
+
+        [SerializeField, BoxGroup("FMOD Events")]
+        private EventReference collectibleRemovedEvent;
 
         [SerializeField, BoxGroup("FMOD Events")]
         private EventReference musicEvent;
@@ -44,6 +50,8 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
 
         private EventInstance ambientInstance;
+        private EventInstance musicInstance;
+        private EventInstance underwaterSnapshotInstance;
 
         private bool isTouchingWater;
 
@@ -58,6 +66,18 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
             waterVolumeDetector.OnWaterContactStateChanged +=
                 HandleWaterContactStateChanged;
+
+            waterVolumeDetector.OnUnderwaterStateChanged +=
+                HandleUnderwaterStateChanged;
+
+            CollectibleTracker.Instance.OnCollectibleGathered +=
+                HandleCollectibleGathered;
+
+            CollectibleTracker.Instance.OnCollectibleRemoved +=
+                HandleCollectibleRemoved;
+
+            audioOptionsUIController.OnAudioOptionChanged +=
+                HandleAudioOptionChanged;
         }
 
 
@@ -71,6 +91,18 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
 
             waterVolumeDetector.OnWaterContactStateChanged -=
                 HandleWaterContactStateChanged;
+
+            waterVolumeDetector.OnUnderwaterStateChanged -=
+                HandleUnderwaterStateChanged;
+
+            CollectibleTracker.Instance.OnCollectibleGathered -=
+                HandleCollectibleGathered;
+
+            CollectibleTracker.Instance.OnCollectibleRemoved -=
+                HandleCollectibleRemoved;
+
+            audioOptionsUIController.OnAudioOptionChanged -=
+                HandleAudioOptionChanged;
         }
 
 
@@ -80,6 +112,16 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
                 RuntimeManager.CreateInstance(ambientEvent);
 
             ambientInstance.start();
+
+
+            musicInstance =
+                RuntimeManager.CreateInstance(musicEvent);
+
+            musicInstance.setParameterByName(
+                "MusicState",
+                0f);
+
+            musicInstance.start();
         }
 
 
@@ -91,6 +133,22 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
                     FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 
                 ambientInstance.release();
+            }
+
+            if (musicInstance.isValid())
+            {
+                musicInstance.stop(
+                    FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+
+                musicInstance.release();
+            }
+
+            if (underwaterSnapshotInstance.isValid())
+            {
+                underwaterSnapshotInstance.stop(
+                    FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+
+                underwaterSnapshotInstance.release();
             }
         }
 
@@ -113,15 +171,13 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
                 materialLabel = surfaceType.ToString();
             }
 
-            // Dirt / Stone / Wood / Water
             footstepInstance.setParameterByNameWithLabel(
                 "MaterialType",
                 materialLabel);
 
-            // 0 = walk, 1 = run
             footstepInstance.setParameterByName(
                 "SpeedBlend",
-                Mathf.Clamp01(speedPercent));
+                speedPercent);
 
             footstepInstance.start();
             footstepInstance.release();
@@ -132,6 +188,30 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
             bool touchingWater)
         {
             isTouchingWater = touchingWater;
+        }
+
+
+        private void HandleUnderwaterStateChanged(
+            bool isUnderwater)
+        {
+            if (isUnderwater)
+            {
+                underwaterSnapshotInstance =
+                    RuntimeManager.CreateInstance(
+                        underwaterSnapshot);
+
+                underwaterSnapshotInstance.start();
+            }
+            else
+            {
+                if (underwaterSnapshotInstance.isValid())
+                {
+                    underwaterSnapshotInstance.stop(
+                        FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+
+                    underwaterSnapshotInstance.release();
+                }
+            }
         }
 
 
@@ -150,6 +230,120 @@ namespace Workshop.Scaffolding.Nature.Scripts.Audio.Manager
             ambientInstance.setParameterByName(
                 "AmbientBlend",
                 value);
+        }
+
+
+        private void HandleCollectibleGathered(
+            CollectibleData data)
+        {
+            if (data.Clip != null)
+            {
+                EventInstance collectibleInstance =
+                    RuntimeManager.CreateInstance(
+                        collectiblePickupEvent);
+
+                collectibleInstance.set3DAttributes(
+                    data.Position.To3DAttributes());
+
+                ProgrammerInstrumentService
+                    .SetupAndStartWithAudioClip(
+                        collectibleInstance,
+                        data.Clip);
+            }
+
+
+            int musicState;
+
+            if (data.Count <= 0)
+            {
+                musicState = 0;
+            }
+            else if (data.Count <= 2)
+            {
+                musicState = 1;
+            }
+            else if (data.Count <= 4)
+            {
+                musicState = 2;
+            }
+            else
+            {
+                musicState = 3;
+            }
+
+            musicInstance.setParameterByName(
+                "MusicState",
+                musicState);
+        }
+
+
+        private void HandleCollectibleRemoved(int count)
+        {
+            int musicState;
+
+            if (count <= 0)
+            {
+                musicState = 0;
+            }
+            else if (count <= 2)
+            {
+                musicState = 1;
+            }
+            else if (count <= 4)
+            {
+                musicState = 2;
+            }
+            else
+            {
+                musicState = 3;
+            }
+
+            musicInstance.setParameterByName(
+                "MusicState",
+                musicState);
+
+
+            EventInstance removedInstance =
+                RuntimeManager.CreateInstance(
+                    collectibleRemovedEvent);
+
+            removedInstance.start();
+            removedInstance.release();
+        }
+
+
+        private void HandleAudioOptionChanged(
+            AudioOptionType type,
+            float value)
+        {
+            string vcaPath;
+
+            switch (type)
+            {
+                case AudioOptionType.Master:
+                    vcaPath = vcaMaster;
+                    break;
+
+                case AudioOptionType.SFX:
+                    vcaPath = vcaSFX;
+                    break;
+
+                case AudioOptionType.Ambience:
+                    vcaPath = vcaAmbience;
+                    break;
+
+                case AudioOptionType.Music:
+                    vcaPath = vcaMusic;
+                    break;
+
+                default:
+                    return;
+            }
+
+            VCA vca =
+                RuntimeManager.GetVCA(vcaPath);
+
+            vca.setVolume(value);
         }
     }
 }
